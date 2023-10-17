@@ -1,0 +1,100 @@
+.App {
+  text-align: center;
+} 
+
+.ingredient-table{
+  margin: 20px auto;
+  min-width: 16rem;
+}
+
+.ingredient-table-body{
+
+}
+
+.ingredient-container{
+
+}
+
+.ingredient{
+  text-align: left;
+  padding: 1px;
+}
+
+.quantity{
+  text-align: right;
+  padding: 1px;
+}
+
+.instruction-container{
+  padding: 0.5rem;
+}
+
+.answer-container{
+  margin: 1rem;
+}
+
+.problem-change-button-container{
+  padding: 1rem;
+}
+
+.problem-change-button{
+  padding: 1rem;
+  margin: 2rem;
+}
+
+.alternative-table{
+
+}
+
+.alternative-container{
+  margin: 0 auto;
+  padding: 0.2rem;
+  width:25rem;
+}
+
+.alternative-button{
+  padding: 0.3rem;
+  width: 80%;
+}
+
+.recipe-link{
+  padding: 0.3rem;
+}
+
+
+.loading {
+  background-color: black;
+  opacity: 0.6;
+  position: fixed; 
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  z-index: 999;
+}
+
+.circle{
+  width:100px;
+  height:100px;
+  border-radius:150px;
+  border:15px solid #0f0f;
+  border-top-color:rgba(0,0,0,0.3);
+  box-sizing:border-box;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  -webkit-transform : translate(-50%,-50%);
+  transform : translate(-50%,-50%);
+  /* position:absolute; */
+  /* margin: 0 auto; */
+  animation:circle 1s linear infinite;
+  -webkit-animation:circle 1s linear infinite;
+}
+@keyframes circle{
+  0%{transform:rotate(0deg)}
+  100%{transform:rotate(360deg)}
+}
+@-webkit-keyframes circle{
+  0%{-webkit-transform:rotate(0deg)}
+  100%{-webkit-transform:rotate(360deg)}
+}
