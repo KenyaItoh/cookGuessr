@@ -6,7 +6,8 @@ import Loading from './components/Loading';
 import { useEffect, useState } from "react"
 import axios from "axios"
 
-const API_SERVER_URL =  "https://skilful-rig-401216.an.r.appspot.com/" + "alternative/"; //"http://localhost:5000/alternative/";
+//const API_SERVER_URL =  "https://skilful-rig-401216.an.r.appspot.com/" + "alternative/";
+const API_SERVER_URL = "http://localhost:5000/alternative/";
 const MAX_MEMO_PROBLEMS = 10;
 
 function App() {
@@ -124,8 +125,7 @@ function App() {
   const getNewProblem = () => {
     setLoading(true);
     axios
-      .post(API_SERVER_URL, {
-        
+      .post(API_SERVER_URL, {  
       })
       .then(response => {
           setLoading(false);
@@ -151,7 +151,7 @@ function App() {
             </tr>
           </thead>
           <tbody className='ingredient-table-body'>
-            {ingredients}  
+            {ingredients} 
           </tbody>
         </table>
 

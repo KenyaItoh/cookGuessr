@@ -5,7 +5,6 @@ const Ingredient = ({ingredient_name, quantity}) => {
             <td className="ingredient">{ingredient_name}</td>
             <td className="quantity">{quantity}</td>
         </tr>
-        
     )
 }
 
