@@ -1,10 +1,14 @@
+import { useEffect, useState, useRef } from "react"
+import axios from "axios"
+import Button from 'react-bootstrap/Button';
+
 import './App.css';
-import Ingredient from './components/Ingredient';
-import Alternatives from './components/Alternatives';
+import IngredientTable from './components/IngredientTable';
+import Instruction from "./components/Instruction";
+import AlternativeTable from './components/AlternativeTable';
 import Loading from './components/Loading';
 
-import { useEffect, useState } from "react"
-import axios from "axios"
+
 
 //const API_SERVER_URL =  "https://skilful-rig-401216.an.r.appspot.com/" + "alternative/";
 const API_SERVER_URL = "http://localhost:5000/alternative/";
@@ -13,113 +17,64 @@ const MAX_MEMO_PROBLEMS = 10;
 function App() {
 
   const [loading, setLoading] = useState(false);
-  const [ingredients, setIngredients] = useState([]);
-  const [instruction, setInstruction] = useState("");
-  const [alternatives, setAlternatives] = useState([]);
-  const [answerDisplay, setAnswerDisplay] = useState(false);
-  const [author, setAuthor] = useState("");
-  const [authorDesc, setAuthorDesc] = useState("");
-  const [url, setUrl] = useState("");
-  const [problemList, setProblemList] = useState([]);
+  const [instruction, setInstruction] = useState(() => <b>問題を読み込んでください</b>);
+  const [isSolving, setIsSolving] = useState(false);
+  const [currentProblem, setCurrentProblem] = useState({names:[], quantities:[], title_list:[],});
+  const problemListRef = useRef([]);
 
-  const alternativeOnClick = (e) => {
+  // useEffect(()=>{
+  //   getNewProblem();
+  // }, [])
 
-    const obj = problemList[problemList.length-1];
-
-    if (e.target.value == obj.answer + 1){
-      setInstruction(<span style={{color:"red"}}><b>〇正解　答え：{obj.answer+1}. {obj.answer_title}</b></span>);
-    }
-    else {
-      setInstruction(<span style={{color:"darkblue"}}><b>×不正解　答え：{obj.answer+1}. {obj.answer_title}</b></span>);
-    }
-
-    const alternative_list = obj.title_list.map(
-      (title, idx) => {
-        return <Alternatives 
-          key={title} 
-          idx={idx+1} 
-          title={title} 
-          disabled={true}
-          href={obj.url_list[idx]}
-        />
-      }
-    );
-    
-    if (obj.answer+1 !== 5){
-      alternative_list.push(<Alternatives key="1~4以外" idx={5} title="1~4以外" disabled={true} />);
-    }
-    else {
-      alternative_list.push(<Alternatives key={obj.answer_title} idx={5} title={obj.answer_title} disabled={true} href={obj.answer_url}/>);
-    }
-    
-    setAlternatives(
-      alternative_list
-    );
-  }
-
-  useEffect(()=>{
-    //console.log(problemList);
-    showProblem();
-  }, [problemList]);
-
-
-  const showProblem = () => {
-    if (problemList.length == 0){
-      setInstruction(<b>問題を読み込んでください</b>)
-    }
-    else {
-      const obj = problemList[problemList.length-1];
-      setIngredients(
-        obj.names.map(
-          (name, idx) => {
-            return <Ingredient key={idx} ingredient_name={name} quantity={obj.quantities[idx]}/>
-          }
-        )
-      )
-
-      setInstruction(
-        <b>答えを選択してください</b>
-      )
-
-      const alternative_list = obj.title_list.map(
-        (title, idx) => {
-          return <Alternatives 
-            key={title} 
-            idx={idx+1} 
-            title={title} 
-            disabled={false}
-            clicked={alternativeOnClick}
-          />
+  const makeIngredients = currentProblem =>{
+    return currentProblem.names.map(
+      (name, idx) => {
+        return {
+          name: name,
+          quantity: currentProblem.quantities[idx],
         }
-      );
-
-      alternative_list.push(<Alternatives 
-        key="1~4以外" idx={5} 
-        title="1~4以外" 
-        disabled={false} 
-        clicked={alternativeOnClick}
-      />)
-
-      setAlternatives(
-        alternative_list
-      )
-    }
+      }
+    )
   }
 
+  const alternativeButtonOnClick = idx => {
+    //正誤確認
+    const cp = currentProblem;
+    if (currentProblem.answer === idx){
+      setInstruction(<span style={{color:"red"}}><b>〇正解　答え：{cp.answer+1}. {cp.answer_title}</b></span>);
+    }
+    else {
+      setInstruction(<span style={{color:"darkblue"}}><b>×不正解　答え：{cp.answer+1}. {cp.answer_title}</b></span>);
+    }
+
+    //isSolving変更
+    setIsSolving(false);
+
+  }
+
+  const makeAlternatives = currentProblem => {
+    return currentProblem.title_list.map( (title, idx) => {
+      return {
+        idx: idx,
+        title: title,
+        href: currentProblem.url_list[idx],
+        clicked: alternativeButtonOnClick
+      }
+    })
+  }
 
   const getPrevProblem = () => {
-    if (problemList.length === 0){
-
+    if (problemListRef.current.length === 0){
     }
-    else if (problemList.length === 1){
+    else if (problemListRef.current.length === 1){
       setInstruction(<b>これ以上前の問題に戻れません</b>)
     }
     else {
-      problemList.pop();
-      setProblemList([...problemList]);
+      problemListRef.current.pop();
+      setCurrentProblem(problemListRef.current[problemListRef.current.length-1]);
+      setInstruction(<b>答えを選択してください</b>);
+      setIsSolving(true);
     }
-    
-    //showProblem();
   }
 
   const getNewProblem = () => {
@@ -129,11 +84,14 @@ function App() {
       })
       .then(response => {
           setLoading(false);
-          problemList.push(response.data);
-          if (problemList.length > MAX_MEMO_PROBLEMS) {
-            problemList.splice(0,1);
+          problemListRef.current.push(response.data);
+          if (problemListRef.current.length > MAX_MEMO_PROBLEMS) {
+            problemListRef.current.splice(0,1);
           }
-          setProblemList([...problemList]);
+          setInstruction(<b>答えを選択してください</b>);
+          setCurrentProblem(response.data);
+          setIsSolving(true);
+          
       })
   }
 
@@ -143,29 +101,12 @@ function App() {
       <div className="App">
         <h1>cookGuessr</h1>
         <p>ルール：材料と分量から料理名を当てよう</p>
-        <table border={3} align='center' className='ingredient-table'>
-          <thead>
-            <tr>
-              <th>材料</th>
-              <th>分量</th>
-            </tr>
-          </thead>
-          <tbody className='ingredient-table-body'>
-            {ingredients} 
-          </tbody>
-        </table>
-
-        <div className='instruction-container'>
-          {instruction}
-        </div>
-
-        <div className='alternative-table'>
-          {alternatives}
-        </div>
-
+        <IngredientTable ingredients={makeIngredients(currentProblem)} />
+        <Instruction instruction={instruction} />
+        <AlternativeTable alternatives={makeAlternatives(currentProblem)} isSolving={isSolving}/>
         <div className='problem-change-button-container'>
-          <button className="problem-change-button" onClick={getPrevProblem}>前の問題</button>
-          <button className="problem-change-button" onClick={getNewProblem}>新しい問題</button>
+          <Button className="problem-change-button" variant="secondary" onClick={getPrevProblem}>前の問題</Button>
+          <Button className="problem-change-button" variant="success" onClick={getNewProblem}>新しい問題</Button>
         </div>
       </div>
     </>

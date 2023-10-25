@@ -5,6 +5,7 @@
 .ingredient-table{
   margin: 20px auto;
   min-width: 16rem;
+  max-width: 32rem;
 }
 
 .ingredient-table-body{
@@ -49,7 +50,7 @@
 .alternative-container{
   margin: 0 auto;
   padding: 0.2rem;
-  width:25rem;
+  width:30rem;
 }
 
 .alternative-button{
@@ -58,7 +59,7 @@
 }
 
 .recipe-link{
-  padding: 0.3rem;
+  padding: 0.5rem;
 }
 
 
