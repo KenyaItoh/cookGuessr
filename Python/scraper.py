@@ -54,6 +54,7 @@ def _is_valid_page(res, url):
     get_text = lambda tags: [tag.get_text() for tag in tags]
     names = get_text(soup.select("#ingredients_list > .ingredient_row > .ingredient_name"))
     quantities = get_text(soup.select("#ingredients_list > .ingredient_row > .ingredient_quantity"))
+    ans_img_url = soup.select_one("#main-photo > img")["src"]
 
     if len(names) < INGREDIENT_SIZE_MIN:
         return 1, []
@@ -132,7 +133,7 @@ def _is_valid_page(res, url):
         return 5, []
     
     #スクレイピング成功！
-    return 0, [title_list, url_list, names, quantities]
+    return 0, [title_list, url_list, names, quantities, ans_img_url]
 
 def scrape_alternative(seed_value=None):
 
@@ -150,7 +151,7 @@ def scrape_alternative(seed_value=None):
             break
         print("ERR:", code)
     
-    title_list, url_list, names, quantities = ret
+    title_list, url_list, names, quantities, ans_img_url = ret
     order = random.sample(range(SCRAPE_SIZE), SCRAPE_SIZE)
     ans = order.index(0)
     ans_title = title_list[0]
@@ -173,6 +174,7 @@ def scrape_alternative(seed_value=None):
         "answer": ans,
         "answer_title": ans_title,
         "answer_url": ans_url,
+        "answer_img_url": ans_img_url,
     }
         
 

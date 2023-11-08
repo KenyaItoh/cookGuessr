@@ -7,6 +7,7 @@ import IngredientTable from './components/IngredientTable';
 import Instruction from "./components/Instruction";
 import AlternativeTable from './components/AlternativeTable';
 import Loading from './components/Loading';
+import ResultModal from "./components/ResultModal";
 
 
 
@@ -21,6 +22,7 @@ function App() {
   const [isSolving, setIsSolving] = useState(false);
   const [currentProblem, setCurrentProblem] = useState({names:[], quantities:[], title_list:[],});
   const problemListRef = useRef([]);
+  const [modalShow, setModalShow] = useState(false);
 
   // useEffect(()=>{
   //   getNewProblem();
@@ -44,11 +46,12 @@ function App() {
       setInstruction(<span style={{color:"red"}}><b>〇正解　答え：{cp.answer+1}. {cp.answer_title}</b></span>);
     }
     else {
-      setInstruction(<span style={{color:"darkblue"}}><b>×不正解　答え：{cp.answer+1}. {cp.answer_title}</b></span>);
+      setInstruction(<span style={{color:"darkblue"}}><b>×不正解 答え：{cp.answer+1}. {cp.answer_title}</b></span>);
     }
 
     //isSolving変更
     setIsSolving(false);
+    setModalShow(true);
 
   }
 
@@ -84,12 +87,16 @@ function App() {
       })
       .then(response => {
           setLoading(false);
-          problemListRef.current.push(response.data);
+          const problemData = response.data;
+          problemData.title_list.push("1~4以外");
+          problemData.url_list.push(problemData.answer == 4 ? problemData.answer_url : void(0));
+
+          problemListRef.current.push(problemData);
           if (problemListRef.current.length > MAX_MEMO_PROBLEMS) {
             problemListRef.current.splice(0,1);
           }
           setInstruction(<b>答えを選択してください</b>);
-          setCurrentProblem(response.data);
+          setCurrentProblem(problemListRef.current.slice(-1)[0]);
           setIsSolving(true);
           
       })
@@ -108,6 +115,13 @@ function App() {
           <Button className="problem-change-button" variant="secondary" onClick={getPrevProblem}>前の問題</Button>
           <Button className="problem-change-button" variant="success" onClick={getNewProblem}>新しい問題</Button>
         </div>
+        <ResultModal 
+          modalShow={modalShow} 
+          setModalShow={setModalShow}
+          currentProblem={currentProblem}
+          getNewProblem={getNewProblem}
+          instruction={instruction}
+        />
       </div>
     </>
   );
